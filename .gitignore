@@ -1,0 +1,22 @@
+# deps
+node_modules
+.pnp
+.pnp.js
+
+# next
+.next
+out
+build
+
+# env / secrets — never commit
+.env
+.env.local
+.env*.local
+
+# runtime data store (scraped posts, drafts, config) — local only
+/data/*.json
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*

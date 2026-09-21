@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f9f4ee;
+  color: #111111;
+}
+
+/* subtle paper hatch texture behind the app */
+body {
+  background-image: radial-gradient(rgba(17, 17, 17, 0.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e4ded3;
+  border-radius: 1.15rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e4ded3;
+  background: #f9f4ee;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.7rem;
+  border: 1px solid #111111;
+  transition: all 0.12s ease;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: #111111;
+  color: #f9f4ee;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #2a2a2a;
+}
+.btn-ghost {
+  background: transparent;
+  color: #111111;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: #eae6dd;
+}
+.btn-accent {
+  background: #c05f3c;
+  color: #ffffff;
+  border-color: #c05f3c;
+}
+.btn-accent:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+textarea {
+  font-family: inherit;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
