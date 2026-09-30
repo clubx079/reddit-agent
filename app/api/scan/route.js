@@ -1,78 +1,35 @@
-// POST /api/scan
-// Runs a Reddit sweep (free, read-only), scores + filters matches, keeps only the
-// top-N most relevant (cost control), upserts them, and — if autoDraft — generates
-// real drafts for at most `max` fresh posts.
-import { NextResponse } from 'next/server';
+// POST → fetch new posts from the Reddit API (read-only) and save the relevant ones.
+//   Needs REDDIT_CLIENT_ID/SECRET (Reddit blocks anonymous access from servers).
+// Also callable by a scheduler with Authorization: Bearer <CRON_SECRET>.
+import { requireUser } from '@/lib/auth';
+import * as db from '@/lib/db';
 import { sweep } from '@/lib/reddit';
-import { scorePost } from '@/lib/relevance';
-import { generateDraft } from '@/lib/draft';
-import { loadStore, upsertPosts, updatePost, getConfig } from '@/lib/store';
-import { CASA_LIBRE } from '@/lib/config';
+import { toPostRow, savePosts } from '@/lib/posts';
+import { getSettings } from '@/lib/settings';
+import { logActivity } from '@/lib/activity';
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(req) {
-  try {
-    const body = await req.json().catch(() => ({}));
-    const autoDraft = body.autoDraft !== false; // default true
-    const config = await getConfig();
-    const max = Math.max(1, Math.min(body.max || config.maxPosts || 6, 12)); // hard ceiling 12
-
-    // 1) Sweep Reddit (free public JSON; OAuth only if creds present).
-    const { posts, errors, authMode, queries } = await sweep(config);
-
-    // 2) Score + filter.
-    const scored = posts
-      .map((p) => ({ ...p, ...scorePost(p, config.keywords) }))
-      .filter((p) => p.relevant && p.score >= (config.minScore || 0))
-      .sort((a, b) => b.score - a.score);
-
-    // 3) COST CONTROL: keep only the top-N.
-    const kept = scored.slice(0, max);
-
-    // 4) Upsert (preserves human edits/status on existing posts).
-    const upsertResult = await upsertPosts(kept);
-
-    // 5) Optionally draft — only fresh posts with no draft yet, capped at `max`.
-    const drafted = [];
-    if (autoDraft) {
-      const store = await loadStore();
-      const toDraft = kept
-        .map((k) => store.posts[k.id])
-        .filter((p) => p && !p.draft && p.status !== 'dismissed')
-        .slice(0, max);
-
-      // ~9:1 rule: enable a Casa Libre mention on at most one draft per batch,
-      // and only when the intent is a natural fit.
-      const mentionIdx = toDraft.findIndex((p) =>
-        ['buying', 'selling', 'market', 'renting'].includes(p.intent)
-      );
-
-      for (let i = 0; i < toDraft.length; i++) {
-        const p = toDraft[i];
-        const mention = i === mentionIdx; // at most one
-        const draft = await generateDraft(p, p.intent, { mention });
-        await updatePost(p.id, { draft, mention });
-        drafted.push({ id: p.id, model: draft.model, mention });
-      }
-    }
-
-    return NextResponse.json({
-      ok: true,
-      authMode,
-      queries,
-      found: posts.length,
-      relevant: scored.length,
-      kept: kept.length,
-      ...upsertResult,
-      drafted: drafted.length,
-      draftDetails: drafted,
-      mentionRatio: CASA_LIBRE.mentionRatio,
-      errors: errors.slice(0, 5),
-    });
-  } catch (e) {
-    return NextResponse.json({ ok: false, error: String(e.message || e) }, { status: 500 });
+  const cron = process.env.CRON_SECRET && req.headers.get('authorization') === `Bearer ${process.env.CRON_SECRET}`;
+  let userId = null;
+  if (!cron) {
+    const { user, error } = await requireUser();
+    if (error) return error;
+    userId = user.id;
   }
+  if (!process.env.REDDIT_CLIENT_ID || !process.env.REDDIT_CLIENT_SECRET) {
+    return Response.json({ error: 'reddit_api_not_configured', hint: 'Add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET (reddit.com/prefs/apps → script app).' }, { status: 503 });
+  }
+  const s = await getSettings();
+  const { posts, errors, authMode, queries } = await sweep({ keywords: s.keywords, subreddits: s.subreddits, timeWindow: s.scan.timeWindow, limitPerQuery: s.scan.limitPerQuery });
+  const rows = posts
+    .map((p) => toPostRow(p, { keywords: s.keywords, minRelevance: s.scan.minRelevance }))
+    .filter(Boolean)
+    .sort((a, b) => b.relevance - a.relevance)
+    .slice(0, s.scan.maxPostsPerScan);
+  const added = await savePosts(db, rows);
+  await logActivity(userId, 'scan.run', { meta: { fetched: posts.length, relevant: rows.length, added, errors: errors.length, authMode, queries } });
+  return Response.json({ fetched: posts.length, relevant: rows.length, added, errors: errors.slice(0, 5), authMode });
 }

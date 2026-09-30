@@ -19,8 +19,14 @@ module.exports = {
         warn: '#B7791F',
       },
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+        sans: ['var(--font-grotesk)', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'Menlo', 'Consolas', 'monospace'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
+      },
+      boxShadow: {
+        hard: '4px 4px 0 #111111',
+        'hard-sm': '3px 3px 0 #111111',
+        soft: '0 1px 2px rgba(17,17,17,.06), 0 4px 16px rgba(17,17,17,.06)',
       },
       borderRadius: {
         xl2: '1.15rem',
