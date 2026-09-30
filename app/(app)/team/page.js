@@ -101,7 +101,7 @@ function InviteModal({ open, onClose, onDone }) {
   return (
     <Modal open={open} onClose={onClose} title="Invite a team member">
       <form onSubmit={submit}>
-        <p className="text-[13.5px] text-muted">They get an email from Casa Libre with a link to create their password.</p>
+        <p className="text-[13.5px] text-muted">They get an email with a link to create their password.</p>
         <label className="label mt-4">Email</label>
         <input type="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" autoFocus />
         <label className="label mt-4">Role</label>

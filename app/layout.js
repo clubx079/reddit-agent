@@ -6,7 +6,7 @@ const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variabl
 const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: 'italic', variable: '--font-serif' });
 
 export const metadata = {
-  title: 'Reddit Agent · Casa Libre',
+  title: 'Reddit Agent',
   description: 'Listening + AI drafting for real-estate conversations on Reddit. Read + draft only — a human posts.',
   robots: { index: false, follow: false },
 };

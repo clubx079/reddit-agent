@@ -1,5 +1,5 @@
 'use client';
-// Small shared UI pieces (Casa Libre ink/paper style). No emojis — icons are inline SVG.
+// Small shared UI pieces (ink/paper style). No emojis — icons are inline SVG.
 import { useEffect } from 'react';
 
 export const INTENT = {
