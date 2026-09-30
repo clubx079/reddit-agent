@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectKnowledge, buildPrompt, allowMention, mentionsCasaLibre } from '../lib/knowledge.js';
+import { selectKnowledge, buildPrompt, allowMention, mentionsCasaLibre, checkDraft } from '../lib/knowledge.js';
+
+test('rule checker catches competitors, sites, banned phrases and forbidden mentions', () => {
+  assert.deepEqual(checkDraft('Compare several listings in the same barrio and check who pays expensas.'), []);
+  assert.match(checkDraft('Try InfoCasas or MercadoLibre.').join(' '), /another property site/);
+  assert.match(checkDraft('Look on olx for rentals').join(' '), /another property site/);
+  assert.match(checkDraft('see example-portal.com.py for more').join(' '), /names a website/);
+  assert.match(checkDraft('Casa Libre has listings', { mention: false }).join(' '), /not allowed/);
+  assert.deepEqual(checkDraft('Browse [casa-libre.com.py](https://casa-libre.com.py/r/rda) for rentals.', { mention: true }), []);
+  assert.match(checkDraft('Try CasaLibre.com', { mention: true }).join(' '), /wrong Casa Libre domain/);
+  assert.match(checkDraft('It is sin intermediarios').join(' '), /banned phrase/);
+  assert.match(checkDraft('Join Facebook groups like "Expats in Asunción".').join(' '), /Facebook groups/);
+});
 
 const KB = [
   { id: 'r1', kind: 'rule', title: 'Answer first', content: 'Answer the question.', priority: 100, active: true },

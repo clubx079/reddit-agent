@@ -51,7 +51,7 @@ insert into public.ra_knowledge (id, kind, title, content, intent, language, pri
  $$Para ver alquileres, en [casa-libre.com.py](https://casa-libre.com.py/r/rda) hay avisos de inmobiliarias y dueños que podés filtrar por barrio, y contactás directo por WhatsApp.$$, 'renting', 'es', 60),
 -- banned
 ('10000000-0000-4000-8000-000000000030','banned','Phrases never to use',
- $$Never write: "sin intermediarios", "no middlemen", "best", "the largest", "#1", "guaranteed", "cheapest", "DM me", "check my profile", "I work at", "we at Casa Libre". Never describe how listings get onto Casa Libre (no "aggregates", no "all listings in one place").$$, null, null, 99),
+ $$Never write: "sin intermediarios", "no middlemen", "best", "the largest", "#1", "guaranteed", "cheapest", "DM me", "check my profile", "I work at", "we at Casa Libre". Never describe how listings get onto Casa Libre (no "aggregates", no "all listings in one place"). Never name any other website, portal, marketplace, app, agency, newspaper or Facebook group (InfoCasas, MercadoLibre, OLX, Clasipar, Airbnb and so on) — say "local property portals", "real estate agencies" or "Facebook groups" instead.$$, null, null, 99),
 -- facts
 ('10000000-0000-4000-8000-000000000040','fact','What Casa Libre is',
  $$Casa Libre is a free property marketplace in South America (Paraguay, Bolivia, Uruguay, Venezuela). Real estate agencies, agents and private owners list homes, apartments and land for sale and for rent. Buyers contact the agency or owner directly by WhatsApp. It is not a real estate agency and charges no commission. Prices are shown in local currency and US dollars.$$, null, null, 80),
